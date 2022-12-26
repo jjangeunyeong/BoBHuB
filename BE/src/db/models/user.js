@@ -62,7 +62,6 @@ class UserModel {
       const query = o.makeUpdateQuery(newDTO, oldDTO);
       console.log(query);
       const [result] = await pool.query(query);
-      console.log(result);
       return buildRes("u", result);
     } catch {
       throw new ErrorFactory(

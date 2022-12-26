@@ -10,7 +10,7 @@ class TrackModel {
       const query = o.makeInsertQuery(keyArr, valArr);
       console.log(query);
 
-      const [result] = await pool.query(query, console.log(query));
+      const [result] = await pool.query(query);
       return buildRes("c", result);
     } catch {
       throw new ErrorFactory(

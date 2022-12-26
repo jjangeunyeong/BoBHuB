@@ -45,7 +45,6 @@ class PartyModel {
 
   async get(partyDTO) {
     try {
-      console.log(partyDTO);
       const whereArr = o.objToQueryArray(partyDTO);
       const query = o.makeSelectQuery({ whereArr });
       console.log(query);

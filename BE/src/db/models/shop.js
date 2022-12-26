@@ -52,7 +52,6 @@ class ShopModel {
       console.log(query);
 
       const [shops] = await pool.query(query);
-      console.log(shops);
 
       return shops;
     } catch {
