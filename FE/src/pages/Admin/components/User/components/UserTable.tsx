@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect, useRef } from 'react';
 import {
   Table,
   TableBody,
@@ -11,29 +11,36 @@ import {
 } from '@mui/material';
 import type { UserType } from './Users';
 import UserModal from './UserModal';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../../store/store';
+import { useNavigate } from 'react-router';
 
 let selectUser: UserType;
 
-interface UserTableProps {
-  users: UserType[];
-  fetchUserData: () => void;
-}
-
-const UserTable = ({ users, fetchUserData }: UserTableProps) => {
+const UserTable = () => {
   const [open, setOpen] = useState<boolean>(false);
   const handleOpen = (user: UserType) => {
     selectUser = user;
     setOpen(true);
   };
+  const navigate = useNavigate();
+  const users = useSelector((state: RootState) => state.adminUsersReducer.users);
   const handleClose = () => setOpen(false);
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    if (isMounted.current) {
+      if (users.length < 1) {
+        alert('권한이 없습니다.');
+        navigate('/');
+      }
+    } else {
+      isMounted.current = true;
+    }
+  }, [users]);
   return (
     <Fragment>
-      <UserModal
-        fetchUserData={fetchUserData}
-        handleClose={handleClose}
-        open={open}
-        user={selectUser}
-      />
+      <UserModal handleClose={handleClose} open={open} user={selectUser} />
       <TableContainer component={Paper} sx={{ overflowY: 'scroll', maxHeight: '60vh' }}>
         <Table aria-label="simple table">
           <TableHead>
@@ -54,7 +61,7 @@ const UserTable = ({ users, fetchUserData }: UserTableProps) => {
                   {user.name}
                 </TableCell>
                 <TableCell align="center">{user.email}</TableCell>
-                <TableCell align="center">{user.nickName}</TableCell>
+                <TableCell align="center">{user.nickname}</TableCell>
                 <TableCell align="center">{user.role}</TableCell>
                 <TableCell align="center">
                   <Button variant="outlined" onClick={() => handleOpen(user)}>

@@ -3,9 +3,13 @@ import UserInfo from './components/UserInfo';
 import NavBar from '../../components/NavBar';
 import DeleteUser from './components/DeleteUser';
 import { useState, useEffect, useRef } from 'react';
-import Button from '@mui/material/Button';
+import { useNavigate } from 'react-router-dom';
+import IconButton from '@mui/material/IconButton';
 import * as API from '../../api/API';
 import axios from 'axios';
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
+import UserProfile from '../../assets/userprofile.png';
+import Footer from '../../components/Footer';
 
 export type UserInfoType = {
   track: string;
@@ -16,10 +20,13 @@ export type UserInfoType = {
   nickname: string;
   profile: string;
   role: string;
+  password: string;
+  newPassword: string;
 };
 
 const MyPage = () => {
   const [profileimg, setProfileImg] = useState<File>();
+  const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState<UserInfoType>({
     track: '',
     generation: 0,
@@ -29,29 +36,35 @@ const MyPage = () => {
     nickname: '',
     profile: '',
     role: '',
+    password: '',
+    newPassword: '',
   });
 
   const isLoaded = useRef<boolean>(false);
 
-  // 사용자 정보 조회 api
   const getUserInfoAPI = async () => {
-    const res = await API.get('/api/users');
-    setUserInfo(res);
+    try {
+      const res = await API.get('/api/users');
+      if (!res) {
+        throw new Error('로그인이 필요한 서비스입니다.');
+      }
+      setUserInfo(res);
+    } catch (err) {
+      alert(err);
+      navigate('/');
+    }
   };
 
   useEffect(() => {
-    try {
-      getUserInfoAPI();
-    } catch (err) {
-      console.error(err);
-    }
+    getUserInfoAPI();
   }, []);
 
   useEffect(() => {
-    if (isLoaded.current) {
-      const res = API.patch(`/api/users`, userInfo);
-      console.log(res);
-    }
+    (async () => {
+      if (isLoaded.current) {
+        const res = await API.patch(`/api/users`, userInfo);
+      }
+    })();
   }, [userInfo]);
 
   const updateProfileImg = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,6 +76,7 @@ const MyPage = () => {
       formData.append('profile', files);
       const res = await axios.post(`/api/users/image`, formData, { withCredentials: true });
       setProfileImg(files);
+      getUserInfoAPI();
     }
   };
 
@@ -74,12 +88,16 @@ const MyPage = () => {
       <Title>My Page</Title>
       <UserUpdate>
         <ImgContainer>
-          <ImgCircle alt="Profile Image" src={userInfo.profile} />
-          <FileUpload
-            onChange={updateProfileImg}
-            type="file"
-            accept="image/jpg,image/jpeg,image/png"
-          />
+          <ImgCircle alt="Profile Image" src={userInfo.profile ? userInfo.profile : UserProfile} />
+          <IconButton sx={{ position: 'absolute', top: '95px', right: '35px' }} component="label">
+            <AddAPhotoIcon color="secondary" />
+            <input
+              onChange={updateProfileImg}
+              type="file"
+              accept="image/jpg,image/jpeg,image/png"
+              hidden
+            />
+          </IconButton>
           <UserName>{userInfo.name}</UserName>
           <UserRole>{userInfo.role === 'admin' ? '관리자' : '레이서'}</UserRole>
         </ImgContainer>
@@ -90,6 +108,7 @@ const MyPage = () => {
           <DeleteUser />
         </SubContainer>
       </UserUpdate>
+      <Footer />
     </Container>
   );
 };
@@ -104,26 +123,25 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: ${({ theme }) => theme.colors.background};
+  background-color: #f7f4f0;
 `;
 
 const SubContainer = styled.div`
   display: flex;
   flex-direction: column;
-  width: 750px;
+  width: 720px;
   padding: 50px;
   margin-top: 10px;
   border-radius: 10px;
   background-color: white;
-  margin-bottom: 50px;
+  margin-bottom: 70px;
 `;
 
 const Title = styled.h1`
   font-weight: bold;
   font-size: 32px;
-  margin: 50px 0px;
-  color: ${({ theme }) => theme.font.color.darkGray};
-  margin-left: 210px;
+  margin: 70px 0 50px 210px;
+  color: ${({ theme }) => theme.font.color.subTitle};
 `;
 
 const SubTitle = styled.h3`
@@ -155,7 +173,7 @@ const UserUpdate = styled.div`
 
 const UserName = styled.h3`
   font-weight: bold;
-  margin-top: 30px;
+  margin-top: 50px;
 `;
 
 const UserRole = styled.div`
@@ -169,8 +187,4 @@ const ImgCircle = styled.img`
   width: 75px;
   height: 75px;
   border-radius: 50px;
-  border: 1px solid black;
-`;
-const FileUpload = styled.input`
-  margin-top: 10px;
 `;

@@ -2,17 +2,13 @@ const AWS = require("aws-sdk");
 const path = require("path");
 const multer = require("multer");
 const multerS3 = require("multer-s3");
+const { logger } = require("../utils");
 const { awsS3Config } = require("../config/aws-s3.config");
 
 AWS.config.update(awsS3Config);
 const s3 = new AWS.S3();
 
 const allowedExtensions = [".png", ".jpg", ".jpeg", ".bmp"];
-
-// const uploadDirectory =()=>{
-
-// }
-
 const imageUploader = multer({
   storage: multerS3({
     s3: s3,
@@ -39,13 +35,13 @@ const imageDeleter = (location) => {
   try {
     s3.deleteObject(params, function (error, data) {
       if (error) {
-        console.log("err: ", error, error.stack);
+        logger.error("err: ", error, error.stack);
       } else {
-        console.log(" 정상 삭제 되었습니다.");
+        logger.info(" 정상 삭제 되었습니다.");
       }
     });
   } catch (err) {
-    console.log(err);
+    logger.error(err);
     throw err;
   }
 };

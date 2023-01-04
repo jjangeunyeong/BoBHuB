@@ -1,11 +1,13 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { Title } from './ChatStyle';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button, TextField } from '@mui/material';
 import { SocketContext } from '../../../socket/SocketContext';
-import { useDispatch, useSelector } from 'react-redux';
-import type { AppDispatch, RootState } from '../../../store/store';
-import { chatAction } from '../../../store/chatSlice';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../../../store/store';
+import ChatMessage from './ChatMessage';
+import { setLog } from '../ChatAppApi';
+import { MessageInfo } from '../ChatAppApi';
 
 const InputContainer = styled.div`
   display: flex;
@@ -15,47 +17,53 @@ const InputContainer = styled.div`
   left: 10px;
 `;
 
-const TextContainer = styled.ul`
+const TextContainer = styled.div`
   background-color: whitesmoke;
-  width: 250px;
-  height: 300px;
-  margin: 20px auto;
-  border-radius: 10px;
-  box-shadow: inset 0 0 10px;
+  width: inherit;
+  height: 330px;
+  padding: 10px 10px 10px 0;
+
   overflow: auto;
   &::-webkit-scrollbar {
     display: none;
   }
+  .labelName {
+    font-size: 10px;
+    margin-left: 10px;
+  }
 `;
 
-const Text = styled.li`
-  font-size: 15px;
-  padding: 10px;
+const Container = styled.div`
+  background-color: whitesmoke;
+  height: 420px;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
 `;
 
 interface ChatRoomProps {
-  roomName: string;
+  roomKey: string;
 }
 
 type sendMessageType = React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>;
 
-const ChatRoom = ({ roomName }: ChatRoomProps) => {
-  const messages = useSelector<RootState>((state) => state.chatReducer.chats[roomName]) as string[];
+const ChatRoom = ({ roomKey }: ChatRoomProps) => {
+  const [messages, setMessage] = useState<MessageInfo[]>([]);
   const [content, setContent] = useState<string>('');
   const socket = useContext(SocketContext);
-  const scrollRef = useRef<HTMLUListElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const userName = useSelector<RootState>((state) => state.userReducer.currentUser.name);
-  const dispatch = useDispatch<AppDispatch>();
+  const userId = useSelector<RootState>((state) => state.userReducer.currentUser.userId);
+  const [roomName, partyId] = roomKey.split('/');
 
-  const addMessage = (msg: string, currentRoom: string) => {
-    if (currentRoom !== roomName) return;
-    const message = `${userName} : ${msg}`;
-    dispatch(chatAction.updateRoom({ roomName, payload: message }));
+  const addMessage = (messageInfo: MessageInfo) => {
+    setLog(roomKey, messageInfo);
+    setMessage((current) => [...current, messageInfo]);
   };
 
   const enterRoom = () => {
-    const message = `${userName}님이 방에 입장하셨습니다.`;
-    dispatch(chatAction.updateRoom({ roomName, payload: message }));
+    const message = `방에 입장하셨습니다.`;
+    const messageInfo = { userId: 0, userName: '', message };
+    setMessage((current) => [...current, messageInfo]);
   };
 
   const sendMessage = (e: sendMessageType) => {
@@ -64,15 +72,23 @@ const ChatRoom = ({ roomName }: ChatRoomProps) => {
       alert('메세지를 입력해주세요');
       return;
     }
-    socket.emit('sendMessage', content, roomName, addMessage);
+    const messageInfo = { userId, userName, message: content };
+    socket.emit('sendMessage', messageInfo, roomKey, addMessage);
     setContent('');
   };
 
   useEffect(() => {
+    const log = localStorage.getItem(roomKey);
+    if (log) {
+      const logArr = JSON.parse(log);
+      setMessage(logArr);
+    }
+
     enterRoom();
-    
-    socket.on('getMessage', (msg) => {
-      dispatch(chatAction.updateRoom({ roomName, payload: msg }));
+
+    socket.on('getMessage', (messageInfo) => {
+      setLog(roomKey, messageInfo);
+      setMessage((current) => [...current, messageInfo]);
     });
   }, []);
 
@@ -84,36 +100,38 @@ const ChatRoom = ({ roomName }: ChatRoomProps) => {
     <>
       <form onSubmit={sendMessage}>
         <Title>{roomName}</Title>
-        <TextContainer ref={scrollRef}>
-          {messages?.map((message: string, idx: number) => (
-            <Text key={`${message}${idx}`}>{message}</Text>
-          ))}
-        </TextContainer>
-        <InputContainer>
-          <TextField
-            hiddenLabel
-            id="filled-basic"
-            variant="filled"
-            size="small"
-            sx={{
-              width: '200px',
-              marginLeft: '10px',
-              '& .MuiInputBase-root': {
-                height: 49,
-              },
-            }}
-            value={content}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setContent(e.target.value)}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            sx={{ height: '46px', width: '50px' }}
-            onClick={sendMessage}>
-            전송
-          </Button>
-        </InputContainer>
+        <Container>
+          <TextContainer ref={scrollRef}>
+            {messages.map((messageInfo: MessageInfo, idx: number) => (
+              <ChatMessage messageInfo={messageInfo} key={`${messageInfo.message}${idx}`} />
+            ))}
+          </TextContainer>
+          <InputContainer>
+            <TextField
+              hiddenLabel
+              id="filled-basic"
+              variant="filled"
+              size="small"
+              sx={{
+                width: '200px',
+                marginLeft: '10px',
+                '& .MuiInputBase-root': {
+                  height: 49,
+                },
+              }}
+              value={content}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setContent(e.target.value)}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              sx={{ height: '46px', width: '50px' }}
+              onClick={sendMessage}>
+              전송
+            </Button>
+          </InputContainer>
+        </Container>
       </form>
     </>
   );

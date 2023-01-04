@@ -1,5 +1,4 @@
-import styled, { css } from 'styled-components';
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { IconButton, Paper } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import ChatRoom from './ChatRoom';
@@ -15,20 +14,18 @@ const ChatPage = ({ handleDisplay }: ChatPageProps) => {
   const [targetRoom, setTargetRoom] = useState<string>('');
   const socket = useContext(SocketContext);
 
-
-  const moveRoom = (roomName: string) => {
-    setTargetRoom(roomName);
+  const moveRoom = (roomKey: string) => {
+    setTargetRoom(roomKey);
     setEnterRoom(true);
   };
 
-  const handleRoom = ()=>{
-    if(targetRoom){
-      socket.emit("leaveRoom", targetRoom);
+  const handleRoom = () => {
+    if (targetRoom) {
+      socket.emit('leaveRoom', targetRoom);
     }
 
     handleDisplay();
-  }
-
+  };
 
   return (
     <>
@@ -48,11 +45,10 @@ const ChatPage = ({ handleDisplay }: ChatPageProps) => {
             top: 0,
             right: 0,
           }}
-          onClick={handleRoom}
-          data-roomName={targetRoom}>
+          onClick={handleRoom}>
           <ClearIcon fontSize="inherit" />
         </IconButton>
-        {enterRoom ? <ChatRoom roomName={targetRoom} /> : <ChatList moveRoom={moveRoom} />}
+        {enterRoom ? <ChatRoom roomKey={targetRoom} /> : <ChatList moveRoom={moveRoom} />}
       </Paper>
     </>
   );
