@@ -8,11 +8,8 @@
     -   [주제](#📌-주제)
     -   [서비스명](#📌-서비스명)
     -   [목적](#📌-목적)
-    -   [목표](#📌-목표)
     -   [타겟 유저](#📌-타겟-유저)
 -   [2️. 서비스 소개](#2️⃣-서비스-소개)
-    -   [서비스 도메인](#🔗-서비스-도메인)
-    -   [테스트 계정](#👥-테스트-계정)
     -   [주요기능](#📌-주요기능)
     -   [페이지별 화면](#📌-페이지별-화면)
     -   [본 프로젝트의 차별점](#📌-본-프로젝트의-차별점)
@@ -30,7 +27,6 @@
     -   [멤버별 Responsibility](#멤버별-responsibility)
 -   [5️. 실행 방법](#5️⃣-실행-방법)
 -   [6️. Version](#6️⃣-version)
--   [7️. 협업 Tools](#7️⃣-협업-tools)
 
 ## 1️⃣ 서비스 개요
 
@@ -47,11 +43,6 @@
 -   새로운 맛집 탐방
 -   타 트랙/기수 레이서 간 친목 도모(네트워킹)
 
-### 📌 목표
-
--   실시간 사용자 트래픽 받아와서 처리하기
--   추가 작성 예정
-
 ### 📌 타겟 유저
 
 -   성수낙낙에서 집중이 잘 돼서 왔는데, <br>
@@ -61,19 +52,7 @@
 
 ## 2️⃣ 서비스 소개
 
-### 🔗 서비스 도메인
-
-http://kdt-sw3-team17.elicecoding.com/ <br>
-<img src="https://user-images.githubusercontent.com/47781507/210108289-aff149fe-9253-4bbc-a3c8-7c3c90d0aaba.png" alt="BoBHuB_QRcode" width="250">
-
-### 👥 테스트 계정
-
-| Role  | ID                | PW   |
-| ----- | ----------------- | ---- |
-| Admin | admin@bobhub.com  | 11qq |
-| User  | elicer@bobhub.com | 11qq |
-
-> ⚠ 실제 서비스는 이메일 인증을 위해 실제 이메일로 가입하셔야 합니다.
+> ⚠ 현재 서버가 내려간 상태입니다.
 
 ### 📌 주요기능
 
@@ -252,9 +231,3 @@ MAIL_PASSWORD = <google developer 비밀번호>
 ## 6️⃣ Version
 
 -   1.0.0
-
-## 7️⃣ 협업 Tools
-
-🔗 [Jira Roadmap](https://17171717.atlassian.net/jira/software/projects/UW17/boards/1/roadmap)
-
-🔗 [Notion](https://www.notion.so/elice/4497050a9ede481ea2481923ef4d5a4f)
